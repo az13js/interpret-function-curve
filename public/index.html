@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpret Function Curve</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #imageContainer {
+            margin: 20px;
+            min-width: 300px;
+            min-height: 300px;
+        }
+        .buttonContainer {
+            margin: 20px;
+        }
+        .buttonContainer button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #result {
+            margin: 20px 0 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interpret Function Curve</h1>
+    <div id="imageContainer"></div>
+    <p><input id="imageInput" type="file" /></p>
+
+    <h2>Canny Edge Detection Input Fields</h2>
+
+    <!-- Input fields with default values -->
+    <div>
+        <label for="htInput">Height Threshold:</label>
+        <input type="number" id="htInput" value="100">
+    </div>
+
+    <div>
+        <label for="ltInput">Low Threshold:</label>
+        <input type="number" id="ltInput" value="50">
+    </div>
+
+    <div>
+        <label for="sigmmaInput">Sigma:</label>
+        <input type="number" id="sigmmaInput" value="1.4">
+    </div>
+
+    <div>
+        <label for="kernelSizeInput">Kernel Size:</label>
+        <input type="number" id="kernelSizeInput" value="3">
+    </div>
+    <div class="buttonContainer">
+        <button id="submitButton">Get Coordinates</button>
+        <button id="downloadBtn">Download CSV</button>
+    </div>
+    <div>
+        <canvas id="cannyEdgeDetection"></canvas>
+        <canvas id="drawCanvas"></canvas>
+    </div>
+    <div id="result"></div>
+
+    <script src="CannyJS.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
