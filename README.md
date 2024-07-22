@@ -33,6 +33,8 @@ This web page has the following features:
 
 5. **Download CSV**: A button allows users to download the edge detection results as a CSV file.
 
+6. **Download CSV (Spline Interpolation)**: Smooth the data using interpolation algorithms.
+
 ## Usage
 
 To use the web application and get the coordinates from the function curve in an image file:
@@ -51,6 +53,9 @@ To use the web application and get the coordinates from the function curve in an
 
 5. **Download the Results**:
    Click the "Download CSV" to trigger the download function, which saves the output as a CSV file containing the coordinates of the function curve's points.
+
+6. **Download CSV (Spline Interpolation)**:
+   Optional. Similar to "Download CSV", smooth the data using interpolation algorithms and trigger the download function.
 
 ## Contributions and Issues
 

@@ -1570,3 +1570,131 @@ For inquiries or contributions, please contact us at [insert contact information
 ## License
 
 [Place the license information here]
+
+
+----------
+
+
+```html
+<button id="downloadBtn">Download CSV</button>
+<button id="downloadUniformData">Download CSV (Using Spline Interpolation to Obtain Uniform Data Points)</button>
+```
+
+This is the JavaScript code that handles the downloading of the CSV file. You should replace the `TODO` placeholder with your actual implementation. The implementation should alert a input box to ask the user for the number of points they want to obtain. And then download the CSV file.
+
+```javascript
+document.getElementById('downloadUniformData').addEventListener('click', () => {
+    // TODO Using Spline Interpolation to Obtain Uniform Data Points
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+    downloadCSV(points);
+});
+
+function downloadCSV(points) {
+    let csvContent = 'data:text/csv;charset=utf-8,' + convertPointsToCSV(points);
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'tableData.csv');
+    document.body.appendChild(link); // Required for Firefox
+
+    link.click();
+    link.remove(); // Remove the link from the document
+}
+
+function cubicSplineInterpolation(x0, points) {
+    if (4 != points.length) {
+        return NaN;
+    }
+    for (let p of points) {
+        if (x0 == p.x) {
+            return p.y;
+        }
+    }
+    let A = [];
+    let b = [];
+    for (let i = 0; i < 4; i++) {
+        A.push([points[i].x * points[i].x * points[i].x, points[i].x * points[i].x, points[i].x, 1.0]);
+        b.push(points[i].y);
+    }
+    // solve A*x=b
+    const x = math.lusolve(A, b);
+    return x[0] * x0 * x0 * x0 + x[1] * x0 * x0 + x[2] * x0 + parseFloat(x[3]);
+}
+```
+The provided JavaScript code snippet is intended to create a downloadable CSV file with a uniform set of data points obtained through spline interpolation. However, there are several issues and missing functionalities in the given code. Below, I will provide a revised implementation, addressing the issues and filling in the missing parts.
+
+Firstly, we need to get the number of points from the user, and then use spline interpolation to generate uniform data points. Also, there is an issue with the `convertPointsToCSV` function, which is not defined. I will create a simplified version to convert an array of data points into CSV format, and then incorporate the user interaction and spline interpolation logic.
+
+```javascript
+document.getElementById('downloadUniformData').addEventListener('click', () => {
+    // Get number of points from user input (assuming there's an input box with id 'numPoints')
+    const numPointsInput = document.getElementById('numPoints');
+    const numPoints = parseInt(numPointsInput.value, 10);
+
+    // Generate uniform data points using cubic spline interpolation (assuming you have a points array)
+    const originalPoints = [{x: 0, y: 1}, {x: 1, y: 2}, {x: 2, y: 4}]; // Example points
+    const uniformPoints = generateUniformPoints(originalPoints, numPoints);
+
+    // Convert uniform data points to CSV format
+    const csvContent = convertDataToCSV(uniformPoints);
+
+    // Download the CSV file
+    downloadCSV(csvContent);
+});
+
+function downloadCSV(csvContent) {
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'uniformData.csv');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+}
+
+function convertDataToCSV(dataPoints) {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += `${dataPoints[0].x},${dataPoints[0].y}\n`; // header
+
+    for (const point of dataPoints.slice(1)) {
+        csvContent += `${point.x},${pointranly, the input array is not structured properly (expected points array with x and y properties).
+
+Here's an improved version of the `convertDataToCSV` function, assuming a fixed input structure:
+
+```javascript
+function convertDataToCSV(dataPoints) {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += `x,y\n${dataPoints[0].x},${dataPoints[0].y}\n`; // header
+
+    for (const point of dataPoints.slice(1)) {
+        csvContent += `${point.x},${point.y}\n`;
+    }
+    return csvContent;
+}
+```
+
+Now, let's address the missing `generateUniformPoints` function and the `TODO` placeholder:
+
+```javascript
+function generateUniformPoints(originalPoints, numPoints) {
+    // Assume the originalPoints array is sorted by x value
+    const xValues = originalPoints.map(p => p.x);
+    const xStep = (xValues[xValues.length - 1] - xValues[0]) / (numPoints - 1);
+    let uniformPoints = [];
+    let x = xValues[0];
+
+    for (let i = 0; i < numPoints; i++) {
+        uniformPoints.push({ x: x, y: cubicSplineInterpolation(x, originalPoints) });
+        x += xStep;
+    }
+
+    return uniformPoints;
+}
+```
+
+Note that this implementation assumes `originalPoints` is a sorted array of objects with x and y properties. The `cubicSplineInterpolation` function is used to obtain the y value for each uniformly spaced x value.
+
+Please ensure you have a valid input mechanism and a well-structured `originalPoints` array for this code to work correctly.

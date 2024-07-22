@@ -1,3 +1,27 @@
+/**
+ * Use L-U solve.
+ * see https://mathjs.org/docs/reference/functions/lusolve.html
+ */
+function cubicSplineInterpolation(x0, points) {
+    if (4 != points.length) {
+        return NaN;
+    }
+    for (let p of points) {
+        if (x0 == p.x) {
+            return p.y;
+        }
+    }
+    let A = [];
+    let b = [];
+    for (let i = 0; i < 4; i++) {
+        A.push([points[i].x * points[i].x * points[i].x, points[i].x * points[i].x, points[i].x, 1.0]);
+        b.push(points[i].y);
+    }
+    // solve A*x=b
+    const x = math.lusolve(A, b);
+    return x[0] * x0 * x0 * x0 + x[1] * x0 * x0 + x[2] * x0 + parseFloat(x[3]);
+}
+
 function createTable(points) {
     let table = `<table border="1">
                     <thead>
@@ -171,6 +195,8 @@ document.getElementById('submitButton').addEventListener('click', function() {
     ctx.drawImage(img, 0, 0, img.width, img.height);
     points = extractedCoordinates(canvas);
     points = deWeightAndAveragePoints(points);
+    // Sort the points based on their x-coordinates in ascending order
+    points.sort((a, b) => a.x - b.x);
 
     let resultDiv = document.getElementById('result');
     resultDiv.innerHTML = createTable(points);
@@ -178,8 +204,66 @@ document.getElementById('submitButton').addEventListener('click', function() {
     drawPointsOnCanvas(points, img.width, img.height, document.getElementById('drawCanvas'));
 });
 
+document.getElementById('downloadUniformData').addEventListener('click', () => {
+    // Using Spline Interpolation to Obtain Uniform Data Points
+
+    const numPoints = parseInt(prompt('Number of points', 10), 10);
+    if (numPoints < 2) {
+        return;
+    }
+
+    // Generate uniform data points using cubic spline interpolation
+    const uniformPoints = generateUniformPoints(points, numPoints);
+
+    // Download the CSV file
+    downloadCSV(uniformPoints);
+});
+
+function findPointsNear(x, points) {
+    let near = 0;
+    let len = points[points.length-1].x - points[0].x;
+    for (let i = 0; i < points.length; i++) {
+        let p = points[i];
+        if (Math.abs(x - p.x) < len) {
+            len = Math.abs(x - p.x);
+            near = i;
+        }
+    }
+    let result = [null, null, null, null];
+    if (x - points[near].x >= 0) {
+        result[0] = near - 1 < 0 ? points[near] : points[near - 1];
+        result[1] = points[near];
+        result[2] = near + 1 >= points.length ? result[1] : points[near + 1];
+        result[3] = near + 1 >= points.length ? result[2] : points[near + 2];
+    } else {
+
+        result[0] = near - 2 < 0 ? points[near] : points[near - 2];
+        result[1] = near - 1 < 0 ? points[near] : points[near - 1];
+        result[2] = points[near];
+        result[3] = near + 1 >= points.length ? result[2] : points[near + 1];
+    }
+    return result;
+}
+
+function generateUniformPoints(points, numPoints) {
+    const firstPoint = points[0];
+    const lastPoint = points[points.length - 1];
+    const xStep = (lastPoint.x - firstPoint.x) / (numPoints - 1);
+    let result = [];
+    for (let i = 0; i < numPoints; i++) {
+        let x = firstPoint.x + i * xStep;
+        let y = cubicSplineInterpolation(x, findPointsNear(x, points));
+        result.push({ x: x, y: y });
+    }
+    return result;
+}
+
 document.getElementById('downloadBtn').addEventListener('click', () => {
-    let csvContent = 'data:text/csv;charset=utf-8,' + convertPointsToCSV();
+    downloadCSV(points);
+});
+
+function downloadCSV(points) {
+    let csvContent = 'data:text/csv;charset=utf-8,' + convertPointsToCSV(points);
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
@@ -189,9 +273,9 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
 
     link.click();
     link.remove(); // Remove the link from the document
-});
+}
 
-function convertPointsToCSV() {
+function convertPointsToCSV(points) {
     let csv = '';
 
     // Add header
